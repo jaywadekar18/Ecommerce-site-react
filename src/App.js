@@ -13,6 +13,7 @@ import Footer from "./shared/Footer";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Profile from "./pages/Profile";
+import Checkout from "./pages/Checkout";
 function App() {
   return (
     <div className="App">
@@ -23,6 +24,7 @@ function App() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/checkout" element={<Checkout />}></Route>
         <Route
           path="/wishlist"
           element={
