@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../shared/AuthContext";
+import { useNavigate } from "react-router-dom";
 const defaultForm = {
   city: "",
   country: "",
@@ -12,8 +13,9 @@ const defaultForm = {
   _id: 0,
 };
 function Profile() {
-  const { isLoggedIn, user, setUserDetail } = useContext(AuthContext);
+  const { logoutUser, user, setUserDetail } = useContext(AuthContext);
   const [addressForm, setAddressForm] = useState(defaultForm);
+  const navigate = useNavigate();
   console.log(user);
   const handleChange = (e) => {
     const { name, value, checked } = e.target;
@@ -32,7 +34,16 @@ function Profile() {
 
     setUserDetail({ ...user, address });
   };
-  const handleDelete = () => {};
+  const logout = () => {
+    logoutUser();
+    navigate("/home");
+  };
+  const handleDelete = (_id) => {
+    setUserDetail((user) => {
+      const address = user.address.filter((address) => address._id !== _id);
+      return { ...user, address };
+    });
+  };
   const handleAdd = () => {
     const newAddress = { ...defaultForm, _id: Math.random() };
     const address = [...user.address, newAddress];
@@ -132,11 +143,14 @@ function Profile() {
                     </div>
                   )
                 )}
-                <button className="add-new-address-btn" onClick={handleAdd}>
-                  Add a new Address ➕🏠
-                </button>
               </div>
             )}
+            <button className="add-new-address-btn" onClick={handleAdd}>
+              Add a new Address ➕🏠
+            </button>
+            <button className="logout-btn" onClick={logout}>
+              Logout
+            </button>
           </div>
         </div>
       )}

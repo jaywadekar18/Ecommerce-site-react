@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import Card from "../shared/Card";
-import { useNavigate, useLocation } from "react-router-dom";
-
+import {
+  ProductContext,
+  DEFAULT_FILTER_VALUES,
+} from "../shared/ProductContext";
+import { useNavigate } from "react-router-dom";
+import loader from "../static/loader.gif";
 function ProductList() {
+  const { filters, setFilters, cart, addProductInCart } =
+    useContext(ProductContext);
   const [products, setProducts] = useState([]);
-  let { state } = useLocation();
-  const [filters, setFilters] = useState({
-    category: [],
-    rating: 0,
-    price: "low-to-high",
-  });
   const [filteredProducts, setFilteredProducts] = useState([]);
-
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
@@ -19,7 +20,11 @@ function ProductList() {
         setProducts(r.products);
         setFilteredProducts(r.products);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
+    return () => {
+      setFilters(DEFAULT_FILTER_VALUES);
+    };
   }, []);
 
   const applyFilters = (e) => {
@@ -44,15 +49,16 @@ function ProductList() {
       return { ...curr, [name]: value };
     });
   };
-  useEffect(() => {
-    console.log("filters", filters);
 
-    console.log("products", products);
+  useEffect(() => {
     dochanges();
   }, [filters]);
 
+  const isProductPresentInCart = (_id) => {
+    return Boolean(cart.find((product) => product._id === _id));
+  };
   const dochanges = () => {
-    const { rating, category, price } = filters;
+    const { rating, category, price, search } = filters;
     let newList = products.filter(
       (product) => Number(product.rating) >= Number(rating)
     );
@@ -62,105 +68,131 @@ function ProductList() {
       }
       return acc;
     }, []);
+    newList = newList?.filter((product) =>
+      product.name.toLowerCase().includes(search.toLowerCase())
+    );
     if (price === "low-to-high") {
       newList.sort((a, b) => a.price - b.price);
     } else newList.sort((a, b) => b.price - a.price);
     setFilteredProducts([...newList]);
-    console.log("newList", newList);
   };
-  // useEffect(() => {
-  //   return () => {
-  //     console.log('ondestroy');
-  //     if (state) state.applyOnce = false;
-
-  //   }
-  // }, [])
   useEffect(() => {
-    console.log("state", state);
-    if (products?.length > 0 && state?.applyOnce) {
-      const filters = {
-        target: { name: "category", value: state.category, checked: true },
-      };
-      applyFilters(filters);
-      state.applyOnce = false;
+    if (products?.length > 0) {
+      dochanges();
     }
   }, [products]);
   return (
-    <div className="product-list-container">
-      <div className="filters">
-        <p className="filter-title">Rating</p>
-        <label>
-          <input
-            type="range"
-            name="rating"
-            min={0}
-            max={5}
-            onChange={applyFilters}
-            value={filters.rating}
-          />
-        </label>
-        <p className="filter-title">Sort by</p>
-        <label>
-          <input
-            type="radio"
-            value="low-to-high"
-            name="price"
-            // checked={filters.category.includes("low-to-high")}
-            onChange={applyFilters}
-          />
-          low-to-high
-        </label>
+    <div>
+      {loading ? (
+        <div className="loader">
+          <img className="loader-img" src={loader} alt="loading-screen" />
+        </div>
+      ) : (
+        <div className="product-list-container">
+          <div className="filters">
+            <p className="filter-title">Rating</p>
+            <label>
+              <input
+                type="range"
+                name="rating"
+                min={0}
+                max={5}
+                onChange={applyFilters}
+                value={filters.rating}
+              />
+            </label>
+            <p className="filter-title">Sort by</p>
+            <label>
+              <input
+                type="radio"
+                value="low-to-high"
+                name="price"
+                checked={filters.price.includes("low-to-high")}
+                onChange={applyFilters}
+              />
+              low-to-high
+            </label>
 
-        <label>
-          <input
-            type="radio"
-            value="high-to-low"
-            name="price"
-            // checked={filters.category.includes("high-to-low")}
-            onChange={applyFilters}
-          />
-          high-to-low
-        </label>
-        <p className="filter-title">Category</p>
-        <label>
-          <input
-            type="checkbox"
-            value="Fiction"
-            name="category"
-            checked={filters.category.includes("Fiction")}
-            onChange={applyFilters}
-          />
-          Fiction
-        </label>
+            <label>
+              <input
+                type="radio"
+                value="high-to-low"
+                name="price"
+                checked={filters.price.includes("high-to-low")}
+                onChange={applyFilters}
+              />
+              high-to-low
+            </label>
+            <p className="filter-title">Category</p>
+            <label>
+              <input
+                type="checkbox"
+                value="Fiction"
+                name="category"
+                checked={filters.category.includes("Fiction")}
+                onChange={applyFilters}
+              />
+              Fiction
+            </label>
 
-        <label>
-          <input
-            type="checkbox"
-            value="Non Fiction"
-            name="category"
-            checked={filters.category.includes("Non Fiction")}
-            onChange={applyFilters}
-          />
-          Non Fiction
-        </label>
+            <label>
+              <input
+                type="checkbox"
+                value="Non Fiction"
+                name="category"
+                checked={filters.category.includes("Non Fiction")}
+                onChange={applyFilters}
+              />
+              Non Fiction
+            </label>
 
-        <label>
-          <input
-            type="checkbox"
-            value="Self Help"
-            name="category"
-            checked={filters.category.includes("Self Help")}
-            onChange={applyFilters}
-          />
-          Self Help
-        </label>
-      </div>
-      <div className="product-list">
-        {filteredProducts.length > 0 &&
-          filteredProducts.map((product) => (
-            <Card key={product.id} item={product} />
-          ))}
-      </div>
+            <label>
+              <input
+                type="checkbox"
+                value="Self Help"
+                name="category"
+                checked={filters.category.includes("Self Help")}
+                onChange={applyFilters}
+              />
+              Self Help
+            </label>
+            <button
+              className="clear-filters-btn"
+              onClick={() => setFilters(DEFAULT_FILTER_VALUES)}
+            >
+              Clear filters
+            </button>
+          </div>
+          <div className="product-list">
+            {filteredProducts.length > 0 &&
+              filteredProducts.map((product) => (
+                <Card key={product._id} item={product}>
+                  {isProductPresentInCart(product._id) ? (
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={(e) => {
+                        navigate("/cart");
+                        e.stopPropagation();
+                      }}
+                    >
+                      Go to cart 🛒
+                    </button>
+                  ) : (
+                    <button
+                      className="add-to-cart-btn"
+                      onClick={(e) => {
+                        addProductInCart(product);
+                        e.stopPropagation();
+                      }}
+                    >
+                      Add to Cart 🛒
+                    </button>
+                  )}
+                </Card>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

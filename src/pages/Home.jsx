@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { ProductContext } from "../shared/ProductContext";
 function Home() {
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
+  const { setFilters } = useContext(ProductContext);
   useEffect(() => {
     fetch("/api/categories")
       .then((res) => res.json())
@@ -10,7 +12,9 @@ function Home() {
       .catch((err) => console.log(err));
   }, []);
   const navigateToProductlistPage = (category) => {
-    navigate(`/product-list`, { state: { category, applyOnce: true } });
+    console.log("categorycategorycategory", category);
+    setFilters((filters) => ({ ...filters, search: "", category: [category] }));
+    navigate(`/product-list`);
   };
   return (
     <div>

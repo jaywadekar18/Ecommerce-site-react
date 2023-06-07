@@ -23,22 +23,11 @@ function Checkout() {
     <div>
       <p className="page-heading">Checkout 🚚</p>
       <div className="checkout-page-container">
-        <div className="checkout-address-section border">
-          {cart?.length > 0 && (
-            <div>
-              {cart.map((product) => (
-                <p>
-                  {product.name} X {product.quantity || 1}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
         <div className="checkout-order-detail">
-          <p>Select delivery address</p>
+          <p className="page-sub-heading">Select delivery address</p>
           {user?.address?.map(
             ({ _id, name, street, state, zipCode, mobile }, index) => (
-              <div className="border">
+              <div className="border address-card">
                 <label>
                   <input
                     type="radio"
@@ -53,8 +42,27 @@ function Checkout() {
               </div>
             )
           )}
+        </div>
+        <div className="checkout-address-section ">
+          <p className="page-sub-heading">Summary</p>
+          {cart?.length > 0 && (
+            <div className="border" style={{ padding: "1rem" }}>
+              <p
+                className="flex-space-between checkout-page-product-title"
+                style={{ fontSize: "1.3rem", color: "grey" }}
+              >
+                <span>Book name</span> Quantity{" "}
+              </p>
+              {cart.map((product) => (
+                <p className="flex-space-between  checkout-page-product-title">
+                  <span className="">{product.name}</span>
+                  <span>X {product.quantity}</span>
+                </p>
+              ))}
+            </div>
+          )}
           <button className="placeorder-btn" onClick={handleOrder}>
-            Place order
+            Place order 🚀
           </button>
         </div>
       </div>

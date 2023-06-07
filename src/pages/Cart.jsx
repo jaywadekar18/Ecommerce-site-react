@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
 import { ProductContext } from "../shared/ProductContext";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 function Cart() {
   const { cart, removeProductFromCart, updateCart } =
     useContext(ProductContext);
-
+  const navigate = useNavigate();
   useState(() => {}, [cart]);
   console.log("cart", cart);
   const handleQuantity = (_id, action) => {
@@ -31,7 +31,7 @@ function Cart() {
         <div className="cart-card-list">
           {cart.length > 0 &&
             cart.map((product) => (
-              <div className="cart-card">
+              <div className="cart-card" key={product._id}>
                 <img src={product.imageLink} alt="prod img" />
                 <div className="cart-detail">
                   <div>
@@ -66,11 +66,24 @@ function Cart() {
         <div className="checkout-section border">
           <p> Order details</p>
 
-          <p>Original price Rs. {totalOriginalPrice()}</p>
+          <p className="flex-space-between">
+            <span>Original price</span> <span>Rs. {totalOriginalPrice()}</span>
+          </p>
 
-          <p>Discount Rs. {totalOriginalPrice() - totalPrice()}</p>
-          <p>Total price Rs. {totalPrice()}</p>
-          <NavLink to="/checkout">Checkout</NavLink>
+          <p className="flex-space-between">
+            <span>Discount</span>
+            <span>- Rs. {totalOriginalPrice() - totalPrice()}</span>
+          </p>
+          <p className="flex-space-between">
+            <span> Total price </span>
+            <span> Rs. {totalPrice()}</span>
+          </p>
+          <button
+            className="checkout-btn"
+            onClick={() => navigate("/checkout")}
+          >
+            Checkout
+          </button>
         </div>
       </div>
     </div>

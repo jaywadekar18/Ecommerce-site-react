@@ -10,8 +10,8 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Privateroute from "./shared/Privateroute";
 import Footer from "./shared/Footer";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Profile from "./pages/Profile";
 import Checkout from "./pages/Checkout";
 function App() {
@@ -20,7 +20,14 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/product-list" element={<ProductList />}></Route>
-        <Route path="/cart" element={<Cart />}></Route>
+        <Route
+          path="/cart"
+          element={
+            <Privateroute>
+              <Cart />
+            </Privateroute>
+          }
+        ></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/profile" element={<Profile />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
@@ -36,8 +43,7 @@ function App() {
         <Route path="/product/:id" element={<ProductDetail />}></Route>
         <Route path="*" element={<Home />}></Route>
       </Routes>
-      <ToastContainer position="top-center"
-        autoClose={2000} />
+      <ToastContainer position="top-center" autoClose={2000} />
       <Footer />
     </div>
   );
